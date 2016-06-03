@@ -1,0 +1,194 @@
+
+<!doctype= html>
+
+<html>
+<head>
+
+
+  <title>Wheel Rolling</title>
+
+<body>
+
+<div style="float: left; padding-right: 20px;">
+	<p>&#952 = <span id="SliderTheta">30</span> <sup>o</sup> </p><input id="Theta_deg" type="range" value="30" step="5" min="5" max="35" onInput="ThetaChange(this.value)">
+	<p>R = <span id="SliderRadius">0.5</span> m </p><input id="R" type="range" step="0.1" value="0.5" min="0.1" max="1" onInput="RadiusChange(this.value)"><br><br>
+
+<input type="button" value="Go" onclick="start_sim()"><br>
+</div>
+		<canvas id="myCanvas" width="600" height="500" style="border:1px solid #d3d3d3; float: left;"></canvas>
+  <script>
+
+function ThetaChange(val) {
+	document.getElementById('SliderTheta').innerHTML = val;
+}
+
+function RadiusChange(val) {
+	document.getElementById('SliderRadius').innerHTML = val;
+}
+
+var myinterval;
+var dt = 0.005; // in seconds
+//scale is 50 pixles per meter
+var scale = 100
+var canvasheight = document.getElementById('myCanvas').height / scale //canvasheight in meters
+var canvaswidth = document.getElementById('myCanvas').width / scale // canvaswidth in meters
+
+//inputs and geometry
+var M;
+var theta;
+var R;
+var base;
+var b; //where wheel is touching incline from base of incline
+var x_0; //intial center of wheel
+var y_0;
+var gamma; //initial angle of stoke 1
+
+//properties of wheel
+var m_r;
+var m_spoke;
+var I_r;
+var I_s;
+var I_o;
+var F;
+var a_G;
+var alpha;
+var omega;
+var v;
+
+function start_sim(){
+	clearInterval(myinterval);
+//inputs and geometry
+M = 0.5;
+theta = Number(document.getElementById("Theta_deg").value)*Math.PI/180;
+R = Number(document.getElementById("R").value);
+base = 5;
+b = (9/10) * base; //where wheel is touching incline from base of incline
+x_0 = b+0.5*(canvaswidth-base)-R*Math.sin(theta); //intial center of wheel
+y_0 = canvasheight - (b*Math.tan(theta) + R*Math.cos(theta));
+gamma = 0; //initial angle of stoke 1
+
+//properties of wheel
+m_r = M * 2 * Math.PI / (2 * Math.PI + 8);
+m_spoke = M * 1 / (2 * Math.PI + 8);
+I_r = m_r * R * R;
+I_s = (8/3) * m_spoke * R * R;
+I_o = I_r + I_s;
+F = (M * I_o * 9.81 * Math.sin(theta)) / (M * R * R + I_o);
+a_G = 9.81 * Math.sin(theta) - F / M;
+alpha = F * R / I_o;
+omega = 0;
+v = 0;
+	myinterval = setInterval(function(){simulate_calcs()}, dt * 1000)
+}
+
+
+function simulate_calcs() {
+var ctx=getCanvas();
+
+ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
+	//test
+	drawBall(30,30,30);
+
+	//drawing incline slant
+	drawLine(0.5*(canvaswidth-base), canvasheight, 0.5*(canvaswidth+base), (canvasheight - Math.tan(theta)*base));
+	//drawing incline height
+	drawLine(0.5*(canvaswidth+base), canvasheight, 0.5*(canvaswidth+base), (canvasheight - Math.tan(theta)*base));
+
+	//drawing Initial rim placement
+	drawBall(x_0,y_0,R);
+	//drawing Initial 8 bars with 45 degree spacing
+	//1
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 0*Math.PI/4)),(y_0-R*Math.sin(gamma + 0*Math.PI/4)));
+	//2
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 1*Math.PI/4)),(y_0-R*Math.sin(gamma + 1*Math.PI/4)));
+	//3
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 2*Math.PI/4)),(y_0-R*Math.sin(gamma + 2*Math.PI/4)));
+	//4
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 3*Math.PI/4)),(y_0-R*Math.sin(gamma + 3*Math.PI/4)));
+	//5
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 4*Math.PI/4)),(y_0-R*Math.sin(gamma + 4*Math.PI/4)));
+	//6
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 5*Math.PI/4)),(y_0-R*Math.sin(gamma + 5*Math.PI/4)));
+	//7
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 6*Math.PI/4)),(y_0-R*Math.sin(gamma + 6*Math.PI/4)));
+	//8
+	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 7*Math.PI/4)),(y_0-R*Math.sin(gamma + 7*Math.PI/4)));
+
+	//translation of center of mass
+	v = a_G * dt + v;
+	x_0 = - v * Math.cos(theta) * dt + x_0;
+	y_0 = v * Math.sin(theta) * dt + y_0;
+
+	// rotation of wheel relative to center of mass
+	omega = alpha * dt + omega;
+	gamma = omega * dt + gamma;
+
+}
+
+
+
+
+function getCanvas() {
+	var c = document.getElementById("myCanvas");
+	return c.getContext("2d");
+} 
+
+function drawRectangle( x, y,  width, height) {
+	var ctx = getCanvas();
+	ctx.beginPath();
+	ctx.rect(x * scale, y * scale, width * scale, height * scale);
+	ctx.stroke();
+}
+
+function drawLine(x1,y1,x2,y2) {
+	var ctx = getCanvas();
+	ctx.beginPath();
+	ctx.moveTo(x1 * scale,y1 * scale);
+	ctx.lineTo(x2 * scale,y2 * scale);
+	ctx.stroke();
+}
+
+function drawArrowLarge(x,y,x_tip,y_tip,colour) {
+	var ctx = getCanvas();
+	var theta = Math.atan((y_tip - y) / (x_tip - x));
+	if (x_tip - x < 0) {
+    theta = theta + Math.PI;
+} else { 
+    theta = theta;
+}
+	ctx.beginPath();
+	ctx.moveTo(x * scale, y * scale);
+	ctx.lineTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.3 * Math.sin(0.25 * Math.PI - theta), scale*y_tip - scale*0.3 * Math.cos(0.25 * Math.PI - theta));
+	ctx.moveTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.3 * Math.cos(0.25 * Math.PI - theta), scale*y_tip + scale*0.3 * Math.sin(0.25 * Math.PI - theta));
+	ctx.stroke();
+}
+
+function drawArrowSmall(x,y,x_tip,y_tip) {
+	var ctx = getCanvas();
+	var theta = Math.atan((y_tip - y) / (x_tip - x));
+		if (x_tip - x < 0) {
+	    theta = theta + Math.PI;
+	} else { 
+	    theta = theta;
+	}
+	ctx.beginPath();
+	ctx.moveTo(x * scale, y * scale);
+	ctx.lineTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.15 * Math.sin(Math.PI/3 - theta), scale*y_tip - scale*0.15 * Math.cos(Math.PI/3 - theta));
+	ctx.moveTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.15 * Math.cos(Math.PI/6 - theta), scale*y_tip + scale*0.15 * Math.sin(Math.PI/6 - theta));
+	ctx.stroke();
+}
+
+function drawBall(x1,y1,r) {
+	var ctx = getCanvas();
+	ctx.beginPath();
+	ctx.arc(x1 * scale,y1 * scale,r * scale,0,2*Math.PI);
+	ctx.stroke();
+}
+
+  </script>
+</body>
+</html>

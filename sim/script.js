@@ -187,11 +187,11 @@ function displayValues() {
 function getValuesFromSS() {
 //randbetween(x1,x2,inc). Math.floor(Math.random() * (x2-x1+1)/inc + x1/inc)*inc
 
-    values.M = model.get('M'); //1<= M <= 4 (incriment 1)
-    values.R = model.get('R'); //0.5 <= R <= 1.2 (incriment 0.1)
+    values.M = Math.floor(Math.random()* 4 + 1)*1; //1<= M <= 4 (incriment 1)
+    values.R = Math.floor(Math.random() * 8 + 5)*0.1; //0.5 <= R <= 1.2 (incriment 0.1)
     page = model.get('page');
-    values.theta_deg = model.get('theta_deg'); //20 <= theta_deg <= 45 (incriment 5)
-    values.X = model.get('X');
+    values.theta_deg = model.get(theta_deg); //20 <= theta_deg <= 45 (incriment 5)
+    values.X = Math.floor(Math.random() * 5 + 2)*1;
 }
                             // function getValuesFromSS() {
                             //     values.M = model.get('M');

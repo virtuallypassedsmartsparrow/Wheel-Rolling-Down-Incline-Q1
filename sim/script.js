@@ -86,7 +86,7 @@ var model = new pipit.CapiAdapter.CapiModel({
     I_o: " ",
     F: " ",
     a_G: " ",
-    X: "4",
+    X: " ",
     T: " ",
     V_G: " ",
 });

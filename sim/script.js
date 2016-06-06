@@ -75,9 +75,9 @@ var units = { //write the units
 
 // Get values from SS
 var model = new pipit.CapiAdapter.CapiModel({
-    M: "2", 
-    R: "3",
-    theta_deg: "20",
+    M: " ", 
+    R: " ",
+    theta_deg: " ",
     theta_rad: " ",
     m_r: " ",
     m_spoke: " ",

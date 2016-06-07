@@ -167,7 +167,7 @@ function displayValues() {
 
         s += name + " = " + value + " " + unit + "<br>";
 
-        if (num == 3) {
+        if (num == 4) {
             s += "</td><td>";
             num = 0
         }

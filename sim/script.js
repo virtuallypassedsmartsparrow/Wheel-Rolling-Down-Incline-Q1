@@ -89,7 +89,7 @@ var model = new pipit.CapiAdapter.CapiModel({
     X: " ",
     T: " ",
     V_G: " ",
-    page: " ",
+    page: "10",
 });
 // I think this exposes the values to Smart Sparrow. :D
 pipit.CapiAdapter.expose('M', model);

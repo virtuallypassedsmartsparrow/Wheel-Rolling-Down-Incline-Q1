@@ -106,6 +106,8 @@ pipit.CapiAdapter.expose('X', model);
 pipit.CapiAdapter.expose('T', model);
 pipit.CapiAdapter.expose('V_G', model);
 
+pipit.CapiAdapter.expose('page', model);
+
 //this gets the values from Smart Sparrow. So does that mean I need to put inputs into Smart Sparrow variable tab? Either way, I'm sure these are just the inputs
 //I think I can place M R theta_deg in variables. Then make pages # in iniitial state. Then i'm done??!
 pipit.Controller.notifyOnReady();
@@ -122,9 +124,9 @@ model.on("change:theta_deg", function() {
 model.on("change:X", function() {
     draw();
 });
-// model.on("change:page", function() {
-//     draw();
-// });
+model.on("change:page", function() {
+    draw();
+});
 
 // This is JQuery right? 
 $("#selectBox").change(function() {
@@ -187,19 +189,19 @@ function displayValues() {
 function getValuesFromSS() {
 //randbetween(x1,x2,inc). Math.floor(Math.random() * (x2-x1+1)/inc + x1/inc)*inc
 
+
+
+    // values.M = Math.floor(Math.random()* 4 + 1)*1; //1<= M <= 4 (incriment 1)
+    // values.R = Math.floor(Math.random() * 8 + 5)*0.1; //0.5 <= R <= 1.2 (incriment 0.1)
+    // page = model.get('page');
+    // values.theta_deg = model.get(theta_deg); //20 <= theta_deg <= 45 (incriment 5)
+    // values.X = Math.floor(Math.random() * 5 + 2)*1;
                                 values.M = model.get('M');
                                 values.R = model.get('R');
                                 page = model.get('page');
                                 values.theta_deg = model.get('theta_deg');
                                 values.X = model.get('X');
-}
-                            // function getValuesFromSS() {
-                            //     values.M = model.get('M');
-                            //     values.R = model.get('R');
-                            //     page = model.get('page');
-                            //     values.theta_deg = model.get('theta_deg');
-                            //     values.X = model.get('X');
-                            // }
+                            }
 //ones the inputs are pulled from Smart Sparrow then they're calculated (all part of the draw function). Make sure I start from elementary formulas and work done.
 function calculateVariables() {
     values.theta_rad = values.theta_deg * Math.PI / 180;

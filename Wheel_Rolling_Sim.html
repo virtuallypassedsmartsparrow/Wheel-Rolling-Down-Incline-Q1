@@ -7,15 +7,14 @@
 
   <title>Wheel Rolling</title>
 
-<body>
+<body onload="start_sim()">
 
 <div style="float: left; padding-right: 20px;">
-	<p>&#952 = <span id="SliderTheta">30</span> <sup>o</sup> </p><input id="Theta_deg" type="range" value="30" step="5" min="5" max="35" onInput="ThetaChange(this.value)">
-	<p>R = <span id="SliderRadius">0.5</span> m </p><input id="R" type="range" step="0.1" value="0.5" min="0.1" max="1" onInput="RadiusChange(this.value)"><br><br>
+	<p>&#952 = <span id="SliderTheta">25</span> <sup>o</sup> </p><input id="Theta_deg" type="range" value="25" step="5" min="5" max="25" onInput="ThetaChange(this.value)" onmouseup="start_sim()">
+	<p>R = <span id="SliderRadius">0.5</span> m </p><input id="R" type="range" step="0.1" value="0.5" min="0.1" max="0.6" onInput="RadiusChange(this.value)" onmouseup="start_sim()"><br><br>
 
-<input type="button" value="Go" onclick="start_sim()"><br>
 </div>
-		<canvas id="myCanvas" width="600" height="500" style="border:1px solid #d3d3d3; float: left;"></canvas>
+		<canvas id="myCanvas" width="502" height="300" style="border:1px solid #d3d3d3; float: left;"></canvas>
   <script>
 
 function ThetaChange(val) {
@@ -27,7 +26,9 @@ function RadiusChange(val) {
 }
 
 var myinterval;
+var ctx = getCanvas();
 var dt = 0.005; // in seconds
+var timer = 0;
 //scale is 50 pixles per meter
 var scale = 100
 var canvasheight = document.getElementById('myCanvas').height / scale //canvasheight in meters
@@ -57,11 +58,12 @@ var v;
 
 function start_sim(){
 	clearInterval(myinterval);
+timer = 0;
 //inputs and geometry
 M = 0.5;
 theta = Number(document.getElementById("Theta_deg").value)*Math.PI/180;
 R = Number(document.getElementById("R").value);
-base = 5;
+base = 0.9*canvaswidth;
 b = (9/10) * base; //where wheel is touching incline from base of incline
 x_0 = b+0.5*(canvaswidth-base)-R*Math.sin(theta); //intial center of wheel
 y_0 = canvasheight - (b*Math.tan(theta) + R*Math.cos(theta));
@@ -86,13 +88,34 @@ function simulate_calcs() {
 var ctx=getCanvas();
 
 ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
-	//test
-	drawBall(30,30,30);
 
-	//drawing incline slant
-	drawLine(0.5*(canvaswidth-base), canvasheight, 0.5*(canvaswidth+base), (canvasheight - Math.tan(theta)*base));
-	//drawing incline height
-	drawLine(0.5*(canvaswidth+base), canvasheight, 0.5*(canvaswidth+base), (canvasheight - Math.tan(theta)*base));
+	timer = timer + dt; 
+	ctx.font = '20px Calibri';
+	ctx.fillStyle = 'black';
+	ctx.fillText("Time: " + Math.round(timer*10)/10 + " s", 10, 30);
+	ctx.fill();
+
+	//drawing slant
+	ctx.beginPath();
+	ctx.moveTo(0.5*(canvaswidth-base)*scale, canvasheight*scale);
+	ctx.lineTo(0.5*(canvaswidth+base)*scale, (canvasheight*scale - Math.tan(theta)*base*scale));
+	ctx.lineTo(0.5*(canvaswidth+base)*scale, canvasheight*scale);
+	ctx.closePath();
+	ctx.fillStyle = "rgba(101,200,206,0.8)"
+	ctx.fill();
+
+	// //test slant
+	// ctx.beginPath();
+	// ctx.moveTo(1,1);
+	// ctx.lineTo(2,2);
+	// ctx.closePath();
+	// ctx.stroke();
+
+	// //drawing incline slant
+	// drawLine(0.5*(canvaswidth-base), canvasheight, 0.5*(canvaswidth+base), (canvasheight - Math.tan(theta)*base));
+	// //drawing incline height
+	// drawLine(0.5*(canvaswidth+base), canvasheight, 0.5*(canvaswidth+base), (canvasheight - Math.tan(theta)*base));
+
 
 	//drawing Initial rim placement
 	drawBall(x_0,y_0,R);
@@ -114,6 +137,9 @@ ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
 	//8
 	drawLine(x_0,y_0,(x_0+R*Math.cos(gamma + 7*Math.PI/4)),(y_0-R*Math.sin(gamma + 7*Math.PI/4)));
 
+	ctx.strokeStyle = "rgba(157,78,21,0.8)";
+	ctx.lineWidth = 3;
+
 	//translation of center of mass
 	v = a_G * dt + v;
 	x_0 = - v * Math.cos(theta) * dt + x_0;
@@ -134,14 +160,14 @@ function getCanvas() {
 } 
 
 function drawRectangle( x, y,  width, height) {
-	var ctx = getCanvas();
+
 	ctx.beginPath();
 	ctx.rect(x * scale, y * scale, width * scale, height * scale);
 	ctx.stroke();
 }
 
 function drawLine(x1,y1,x2,y2) {
-	var ctx = getCanvas();
+
 	ctx.beginPath();
 	ctx.moveTo(x1 * scale,y1 * scale);
 	ctx.lineTo(x2 * scale,y2 * scale);
@@ -149,7 +175,7 @@ function drawLine(x1,y1,x2,y2) {
 }
 
 function drawArrowLarge(x,y,x_tip,y_tip,colour) {
-	var ctx = getCanvas();
+
 	var theta = Math.atan((y_tip - y) / (x_tip - x));
 	if (x_tip - x < 0) {
     theta = theta + Math.PI;
@@ -166,7 +192,7 @@ function drawArrowLarge(x,y,x_tip,y_tip,colour) {
 }
 
 function drawArrowSmall(x,y,x_tip,y_tip) {
-	var ctx = getCanvas();
+
 	var theta = Math.atan((y_tip - y) / (x_tip - x));
 		if (x_tip - x < 0) {
 	    theta = theta + Math.PI;
@@ -183,7 +209,7 @@ function drawArrowSmall(x,y,x_tip,y_tip) {
 }
 
 function drawBall(x1,y1,r) {
-	var ctx = getCanvas();
+
 	ctx.beginPath();
 	ctx.arc(x1 * scale,y1 * scale,r * scale,0,2*Math.PI);
 	ctx.stroke();

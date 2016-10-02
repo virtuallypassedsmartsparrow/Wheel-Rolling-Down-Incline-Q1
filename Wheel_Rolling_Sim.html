@@ -56,6 +56,8 @@ var alpha;
 var omega;
 var v;
 
+var X;
+
 function start_sim(){
 	clearInterval(myinterval);
 timer = 0;
@@ -68,6 +70,7 @@ b = (9/10) * base; //where wheel is touching incline from base of incline
 x_0 = b+0.5*(canvaswidth-base)-R*Math.sin(theta); //intial center of wheel
 y_0 = canvasheight - (b*Math.tan(theta) + R*Math.cos(theta));
 gamma = 0; //initial angle of stoke 1
+X = base / Math.cos(theta);
 
 //properties of wheel
 m_r = M * 2 * Math.PI / (2 * Math.PI + 8);
@@ -93,7 +96,6 @@ ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
 	ctx.font = '20px Calibri';
 	ctx.fillStyle = 'black';
 	ctx.fillText("Time: " + Math.round(timer*10)/10 + " s", 10, 30);
-	ctx.fill();
 
 	//drawing slant
 	ctx.beginPath();
@@ -148,6 +150,11 @@ ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
 	// rotation of wheel relative to center of mass
 	omega = alpha * dt + omega;
 	gamma = omega * dt + gamma;
+
+	//restart sim when wheel has rolled down hill
+	if (timer > Math.sqrt(2*X/a_G)) {
+		start_sim();
+	}
 
 }
 
